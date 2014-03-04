@@ -13,6 +13,7 @@ import flixel.FlxObject;
 import flixel.util.FlxPath;
 import openfl.Assets;
 import flixel.util.FlxPoint;
+import flixel.tile.FlxBaseTilemap;
 
 /**
  * A FlxState which can be used for the actual gameplay.
@@ -62,7 +63,7 @@ class PlayState extends FlxState
 		_isoTilemap = new FlxTilemapIso();
 		_isoTilemap.loadMap(Assets.getText(MAP),
 				TILESET,
-				TILE_WIDTH, TILE_DEPTH, TILE_HEIGHT, FlxTilemapIso.OFF,
+				TILE_WIDTH, TILE_DEPTH, TILE_HEIGHT, FlxBaseTilemap.OFF,
 				0, 0);
 		add(_isoTilemap);
 		
@@ -75,7 +76,7 @@ class PlayState extends FlxState
 		
 		//Create a character
 		_hero = new Character(300, 80);
-		add(_hero);
+		_isoTilemap.add(_hero);
 		_hero.animation.play("stop0");
 		
 		//Create the path
