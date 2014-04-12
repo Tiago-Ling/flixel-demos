@@ -215,12 +215,16 @@ class FlxIsoTilemap extends FlxObject
 	private var _rectIDs:Array<Int>;
 	#end
 	
+	var drawPt:Point;
+	
 	/**
 	 * The tilemap constructor just initializes some basic variables.
 	 */
 	public function new()
 	{
 		super();
+		
+		drawPt = new Point(0, 0);
 		
 		collisionType = FlxCollisionType.TILEMAP;
 		
@@ -1926,13 +1930,16 @@ class FlxIsoTilemap extends FlxObject
 			
 			if (_flashRect != null)
 			{
-				if (isTileOnScreen(_flashRect.isoPos, Camera))
+				drawPt.x = _flashRect.isoPos.x - _point.x;
+				drawPt.y = _flashRect.isoPos.y + _point.y;
+				
+				if (isTileOnScreen(drawPt, Camera))
 				{
 					if (_flashRect.sprite == null) {
-						Buffer.pixels.copyPixels(cachedGraphics.bitmap, _flashRect, _flashRect.isoPos, null, null, true);
+						Buffer.pixels.copyPixels(cachedGraphics.bitmap, _flashRect, drawPt , null, null, true);
 					} else {
 						_flashRect.sprite.draw();
-						Buffer.pixels.copyPixels(_flashRect.sprite.framePixels, _flashRect, _flashRect.isoPos, null, null, true);
+						Buffer.pixels.copyPixels(_flashRect.sprite.framePixels, _flashRect, drawPt, null, null, true);
 					}
 				}
 			}
@@ -1942,8 +1949,8 @@ class FlxIsoTilemap extends FlxObject
 		drawItem.position = currIndex;
 		#end
 		
-		Buffer.x = screenXInTiles * _scaledTileWidth;
-		Buffer.y = screenYInTiles * _scaledTileHeight;
+		//Buffer.x = screenXInTiles * _scaledTileWidth;
+		//Buffer.y = screenYInTiles * _scaledTileHeight;
 	}
 	
 	private function isTileOnScreen(pos:Point, cam:FlxCamera):Bool
