@@ -39,13 +39,11 @@ class PlayState extends FlxState
 		var mapData:Array<Array<Int>> = mapGen.extractData();
 		var flixelMapData:Array<Int> = new Array<Int>();
 		for (i in 0...mapData.length) {
-			//trace(mapData[i]);
 			for (j in 0...mapData[i].length) {
 				flixelMapData.push(mapData[i][j]);
 			}
 		}
 		
-		//var char = new FlxIsoSprite(456, 456);
 		var charA = new FlxIsoSprite(0, 0);
 		
 		var map:FlxIsoTilemap = new FlxIsoTilemap();
@@ -58,9 +56,6 @@ class PlayState extends FlxState
 		add(map);
 		
 		trace("map position : " + map.x + "," + map.y);
-		
-		//map.x -= map.width / 2;
-		
 	}
 	
 	/**
