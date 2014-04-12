@@ -8,6 +8,7 @@ import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
+import flixel.FlxSprite;
 import flixel.group.FlxGroup;
 import flixel.group.FlxTypedGroup;
 import flixel.system.FlxCollisionType;
@@ -25,7 +26,6 @@ import flixel.util.FlxSort;
 import flixel.util.FlxSpriteUtil;
 import flixel.util.loaders.CachedGraphics;
 import flixel.util.loaders.TextureRegion;
-import flixel.FlxSprite;
 
 @:bitmap("assets/images/tile/autotiles.png")	 class GraphicAuto    extends BitmapData {}
 @:bitmap("assets/images/tile/autotiles_alt.png") class GraphicAutoAlt extends BitmapData {}
@@ -584,13 +584,58 @@ class FlxIsoTilemap extends FlxObject
 	
 	private function sortMap():Void
 	{
-		var order:Int = FlxSort.ASCENDING;
+/*		var order:Int = FlxSort.ASCENDING;
 		_rects.sort(isoSort.bind(order));
+		//ArraySort.sort(_rects, isoSort.bind(order));*/
+		
+		sortRange(_rects, compareNumberRise, 0, _rects.length);
 	}
 	
-	private function isoSort(Order:Int, Obj1:IsoRect, Obj2:IsoRect) {
+/*	private function isoSort(Order:Int, Obj1:IsoRect, Obj2:IsoRect) {
 		return FlxSort.byValues(Order, Obj1.depth, Obj2.depth);
+	}*/
+	
+	// ##########################
+	// Insertion Sort Algorithm
+	// Adapted from the Original code by
+	// * POLYGONAL - A HAXE LIBRARY FOR GAME DEVELOPERS
+	// * Copyright (c) 2009 Michael Baczynski, http://www.polygonal.de
+	private function sortRange(a:Array<IsoRect>, compare:IsoRect->IsoRect->Int, first:Int, count:Int)
+	{
+		var k = a.length;
+		if (k > 1)
+		{
+			_insertionSort(a, first, count, compare);
+		}
 	}
+	
+	private function _insertionSort(a:Array<IsoRect>, first:Int, k:Int, cmp:IsoRect->IsoRect->Int)
+	{
+		for (i in first + 1...first + k)
+		{
+			var x = a[i];
+			var j = i;
+			while (j > first)
+			{
+				var y = a[j - 1];
+				if (cmp(y, x) > 0)
+				{
+					a[j] = y;
+					j--;
+				}
+				else
+					break;
+			}
+			
+			a[j] = x;
+		}
+	}
+	
+	private function compareNumberRise(a:IsoRect, b:IsoRect):Int
+	{
+		return a.depth - b.depth;
+	}
+	// ##########################
 	
 	/**
 	 * Set custom tile mapping and/or randomization rules prior to loading. This MUST be called BEFORE loadMap().
@@ -1752,6 +1797,7 @@ class FlxIsoTilemap extends FlxObject
 		
 		var screenXInTiles:Int = Math.floor(_point.x / _scaledTileWidth);
 		var screenYInTiles:Int = Math.floor(_point.y / _scaledTileDepth);
+		
 		var screenRows:Int = Buffer.rows;
 		var screenColumns:Int = Buffer.columns;
 		// Bound the upper left corner
@@ -1784,7 +1830,7 @@ class FlxIsoTilemap extends FlxObject
 		var debugTile:BitmapData;
 		#end 
 		
-		while (row < screenRows)
+/*		while (row < screenRows)
 		{
 			columnIndex = rowIndex;
 			column = 0;
@@ -1872,6 +1918,24 @@ class FlxIsoTilemap extends FlxObject
 			#end
 			rowIndex += widthInTiles;
 			row++;
+		}*/
+		
+		var totalRects:Int = _rects.length;
+		for (i in 0...totalRects){
+			var _flashRect = _rects[i];
+			
+			if (_flashRect != null)
+			{
+				if (isTileOnScreen(_flashRect.isoPos, Camera))
+				{
+					if (_flashRect.sprite == null) {
+						Buffer.pixels.copyPixels(cachedGraphics.bitmap, _flashRect, _flashRect.isoPos, null, null, true);
+					} else {
+						_flashRect.sprite.draw();
+						Buffer.pixels.copyPixels(_flashRect.sprite.framePixels, _flashRect, _flashRect.isoPos, null, null, true);
+					}
+				}
+			}
 		}
 		
 		#if FLX_RENDER_TILE
@@ -1880,6 +1944,11 @@ class FlxIsoTilemap extends FlxObject
 		
 		Buffer.x = screenXInTiles * _scaledTileWidth;
 		Buffer.y = screenYInTiles * _scaledTileHeight;
+	}
+	
+	private function isTileOnScreen(pos:Point, cam:FlxCamera):Bool
+	{
+		((pos.x > (cam.x - _scaledTileWidth) && pos.x < cam.width) && (pos.y > (cam.y - (_scaledTileDepth + _scaledTileHeight)) && pos.y < cam.height)) ? return true : return false;
 	}
 	
 	/**
