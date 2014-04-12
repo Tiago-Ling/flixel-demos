@@ -102,7 +102,7 @@ class FlxIsoTilemap extends FlxObject
 	 * Only affects tilesheet rendering and rendering using BitmapData.draw() in blitting.
 	 * (copyPixels() only renders on whole pixels by nature). Causes draw() to be used if false, which is more expensive.
 	 */
-	public var pixelPerfectRender(default, set):Bool = true;
+	//public var pixelPerfectRender(default, set):Bool = true;
 	
 	/**
 	 * If these next two arrays are not null, you're telling FlxIsoTilemap to 
@@ -640,7 +640,7 @@ class FlxIsoTilemap extends FlxObject
 	}
 	
 	#if !FLX_NO_DEBUG
-	override public function drawDebugOnCamera(?Camera:FlxCamera):Void
+	override public function drawDebugOnCamera(Camera:FlxCamera):Void
 	{
 		#if FLX_RENDER_TILE
 		var buffer:FlxIsoTilemapBuffer = null;
@@ -940,10 +940,10 @@ class FlxIsoTilemap extends FlxObject
 	 */
 	override public function overlaps(ObjectOrGroup:FlxBasic, InScreenSpace:Bool = false, ?Camera:FlxCamera):Bool
 	{
-		var groupResult:Bool = FlxGroup.overlaps(tilemapOverlapsCallback, ObjectOrGroup, 0, 0, InScreenSpace, Camera);
-		if (groupResult)
+		var group:FlxGroup = FlxGroup.resolveGroup(ObjectOrGroup);
+		if (group != null)
 		{
-			return true;
+			FlxGroup.overlaps(tilemapOverlapsCallback, group, 0, 0, InScreenSpace, Camera);
 		}
 		else if (tilemapOverlapsCallback(ObjectOrGroup))
 		{
@@ -979,10 +979,10 @@ class FlxIsoTilemap extends FlxObject
 	 */
 	override public function overlapsAt(X:Float, Y:Float, ObjectOrGroup:FlxBasic, InScreenSpace:Bool = false, ?Camera:FlxCamera):Bool
 	{
-		var groupResult:Bool = FlxGroup.overlaps(tilemapOverlapsAtCallback, ObjectOrGroup, X, Y, InScreenSpace, Camera);
-		if (groupResult)
+		var group:FlxGroup = FlxGroup.resolveGroup(ObjectOrGroup);
+		if (group != null)
 		{
-			return true;
+			return FlxGroup.overlaps(tilemapOverlapsAtCallback, group, X, Y, InScreenSpace, Camera);
 		}
 		else if (tilemapOverlapsAtCallback(ObjectOrGroup, X, Y, InScreenSpace, Camera))
 		{
@@ -2390,7 +2390,7 @@ class FlxIsoTilemap extends FlxObject
 		return cachedGraphics = Value;
 	}
 	
-	private function set_pixelPerfectRender(Value:Bool):Bool 
+	override private function set_pixelPerfectRender(Value:Bool):Bool 
 	{
 		if (_buffers != null)
 		{

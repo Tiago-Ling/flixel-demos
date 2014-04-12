@@ -29,6 +29,8 @@ class PlayState extends FlxState
 		
 		mapWidth = 28;
 		mapHeight = 28;
+/*		mapWidth = 56;
+		mapHeight = 56;*/
 		
 		mapGen = new MapGenerator(mapWidth, mapHeight, 3, 5, 11, false);
 		mapGen.setIndices(9, 8, 10, 11, 14, 16, 17, 15, 7, 5, 1, 1, 0);
