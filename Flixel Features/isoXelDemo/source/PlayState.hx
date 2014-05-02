@@ -54,6 +54,8 @@ class PlayState extends FlxState
 		FlxG.mouse.visible = true;
 		#end
 		
+		FlxG.log.redirectTraces = false;
+		
 		super.create();
 		
 		_hud = new Hud();
@@ -78,6 +80,10 @@ class PlayState extends FlxState
 		_hero = new Character(300, 80);
 		_isoTilemap.add(_hero);
 		_hero.animation.play("stop0");
+		
+/*		var p2 = new Character(272, 232);
+		_isoTilemap.add(p2);
+		p2.animation.play("stop0");*/
 		
 		//Create the path
 		_path = FlxPath.recycle();
@@ -113,7 +119,8 @@ class PlayState extends FlxState
 		if (FlxG.keys.pressed.O)
 			FlxG.camera.zoom /= 1.1;
 
-		if (FlxG.mouse.justPressed)
+		//if (FlxG.mouse.justPressed)
+		if (FlxG.mouse.pressed)
 		{
 			var mouse = FlxG.mouse.getWorldPosition();
 			var path : Array<FlxPoint> = _isoTilemap.findPath(_hero.getMidpoint(), mouse, _hud.simplePath, false);

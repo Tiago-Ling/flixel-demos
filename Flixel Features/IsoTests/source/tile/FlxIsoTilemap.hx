@@ -146,10 +146,10 @@ class FlxIsoTilemap extends FlxObject
 	/**
 	 * Internal representation of rectangles, one for each tile in the entire tilemap, used to speed up drawing.
 	 */
-	#if FLX_RENDER_BLIT
+	//#if FLX_RENDER_BLIT
 	//private var _rects:Array<Rectangle>;
 	private var _rects:Array<IsoRect>;
-	#end
+	//#end
 	/**
 	 * Internal, the width of a single tile.
 	 */
@@ -1933,14 +1933,25 @@ class FlxIsoTilemap extends FlxObject
 				drawPt.x = _flashRect.isoPos.x - _point.x;
 				drawPt.y = _flashRect.isoPos.y + _point.y;
 				
+				
 				if (isTileOnScreen(drawPt, Camera))
 				{
+					
 					if (_flashRect.sprite == null) {
+						#if FLX_RENDER_BLIT
 						Buffer.pixels.copyPixels(cachedGraphics.bitmap, _flashRect, drawPt , null, null, true);
+						#else
+						
+						#end
 					} else {
 						_flashRect.sprite.draw();
+						#if FLX_RENDER_BLIT
 						Buffer.pixels.copyPixels(_flashRect.sprite.framePixels, _flashRect, drawPt, null, null, true);
+						#else
+						
+						#end
 					}
+					
 				}
 			}
 		}

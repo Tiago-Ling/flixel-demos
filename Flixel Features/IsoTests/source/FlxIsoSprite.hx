@@ -21,7 +21,7 @@ class FlxIsoSprite extends FlxSprite
 	
 	function init() 
 	{
-		loadGraphic("images/char_3.png", true, false, 48, 48);
+		loadGraphic("images/char_3.png", true, 48, 48);
 		
 		animation.add("idle_se", [0], 12, true);
 		animation.add("idle_sw", [3], 12, true);
