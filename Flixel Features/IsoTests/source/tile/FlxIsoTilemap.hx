@@ -989,7 +989,7 @@ class FlxIsoTilemap extends FlxObject
 	 */
 	override public function overlaps(ObjectOrGroup:FlxBasic, InScreenSpace:Bool = false, ?Camera:FlxCamera):Bool
 	{
-		var group:FlxGroup = FlxGroup.resolveGroup(ObjectOrGroup);
+		var group = FlxGroup.resolveGroup(ObjectOrGroup);
 		if (group != null)
 		{
 			FlxGroup.overlaps(tilemapOverlapsCallback, group, 0, 0, InScreenSpace, Camera);
@@ -1028,7 +1028,7 @@ class FlxIsoTilemap extends FlxObject
 	 */
 	override public function overlapsAt(X:Float, Y:Float, ObjectOrGroup:FlxBasic, InScreenSpace:Bool = false, ?Camera:FlxCamera):Bool
 	{
-		var group:FlxGroup = FlxGroup.resolveGroup(ObjectOrGroup);
+		var group = FlxGroup.resolveGroup(ObjectOrGroup);
 		if (group != null)
 		{
 			return FlxGroup.overlaps(tilemapOverlapsAtCallback, group, X, Y, InScreenSpace, Camera);
