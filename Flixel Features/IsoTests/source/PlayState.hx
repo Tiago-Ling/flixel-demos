@@ -98,8 +98,6 @@ class PlayState extends FlxState
 	 */
 	override public function update():Void
 	{
-		FlxG.collide(map, map.spriteGroup, onMapCollide);
-		
 		super.update();
 			
 		if (FlxG.keys.pressed.A)
@@ -115,9 +113,4 @@ class PlayState extends FlxState
 			FlxG.resetState();
 		}
 	}	
-	
-	function onMapCollide(objA:Dynamic, objB:Dynamic):Void
-	{
-		trace("Just collided!");
-	}
 }
