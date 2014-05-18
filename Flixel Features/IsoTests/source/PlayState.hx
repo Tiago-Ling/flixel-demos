@@ -5,6 +5,7 @@ import coffeegames.mapgen.MapGenerator;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxState;
+import flixel.text.FlxText;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import tile.FlxIsoTilemap;
 
@@ -61,10 +62,15 @@ class PlayState extends FlxState
 		add(map);
 		
 		//Adding FlxIsoSprite to the map (WARNING: Currently working on Flash only!)
+		#if flash
 		var charA = new FlxIsoSprite(0, 0, false);
 		map.add(charA);
 		var initialTile:IsoRect = map.getIsoRectAt(3 * mapWidth + 3);
 		charA.setPosition(initialTile.isoPos.x, initialTile.isoPos.y);
+		#end
+		
+		var instructions:FlxText = new FlxText(275, 20, 300, "ARROWS to move the sprite\nWASD to scroll the map\nSPACE to reset state", 16);
+		add(instructions);
 		
 		//Adds 10 autonomous moving chars:
 /*		for (i in 0...10)
@@ -92,6 +98,8 @@ class PlayState extends FlxState
 	 */
 	override public function update():Void
 	{
+		FlxG.collide(map, map.spriteGroup, onMapCollide);
+		
 		super.update();
 			
 		if (FlxG.keys.pressed.A)
@@ -107,4 +115,9 @@ class PlayState extends FlxState
 			FlxG.resetState();
 		}
 	}	
+	
+	function onMapCollide(objA:Dynamic, objB:Dynamic):Void
+	{
+		trace("Just collided!");
+	}
 }
