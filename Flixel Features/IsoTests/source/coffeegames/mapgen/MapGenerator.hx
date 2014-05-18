@@ -13,34 +13,34 @@ import flash.geom.Rectangle;
 class MapGenerator {
 	
 	//Mini-map colors
-	private var cNW_CORNER:UInt = 0xFFA30008;
-	private var cNE_CORNER:UInt = 0xFFBC2F36;
-	private var cSE_CORNER:UInt = 0xFFFD3F49;
-	private var cSW_CORNER:UInt = 0xFFFD7279;
-	private var cN_WALL:UInt = 0xFF1D0772;
-	private var cE_WALL:UInt = 0xFF3F2D84;
-	private var cS_WALL:UInt = 0xFF6749D7;
-	private var cW_WALL:UInt = 0xFF856FD7;
-	private var cS_DOOR:UInt = 0xFFFFD100;
-	private var cE_DOOR:UInt = 0xFFBFA530;
-	private var cENTRANCE:UInt = 0xFF82217A;
-	private var cFLOOR:UInt = 0xFFFFFFFF;
-	private var cNOTHING:UInt = 0xFF333333;
+	private var cNW_CORNER:UInt;
+	private var cNE_CORNER:UInt;
+	private var cSE_CORNER:UInt;
+	private var cSW_CORNER:UInt;
+	private var cN_WALL:UInt;
+	private var cE_WALL:UInt;
+	private var cS_WALL:UInt;
+	private var cW_WALL:UInt;
+	private var cS_DOOR:UInt;
+	private var cE_DOOR:UInt;
+	private var cENTRANCE:UInt;
+	private var cFLOOR:UInt;
+	private var cNOTHING:UInt;
 	
 	//Indices
-	private var iNW_CORNER = 0;
-	private var iNE_CORNER = 0;
-	private var iSE_CORNER = 0;
-	private var iSW_CORNER = 0;
-	private var iN_WALL = 0;
-	private var iE_WALL = 0;
-	private var iS_WALL = 0;
-	private var iW_WALL = 0;
-	private var iS_DOOR = 0;
-	private var iE_DOOR = 0;
-	private var iENTRANCE = 0;
-	private var iFLOOR = 0;
-	private var iNOTHING = 0;
+	private var iNW_CORNER:Int;
+	private var iNE_CORNER:Int;
+	private var iSE_CORNER:Int;
+	private var iSW_CORNER:Int;
+	private var iN_WALL:Int;
+	private var iE_WALL:Int;
+	private var iS_WALL:Int;
+	private var iW_WALL:Int;
+	private var iS_DOOR:Int;
+	private var iE_DOOR:Int;
+	private var iENTRANCE:Int;
+	private var iFLOOR:Int;
+	private var iNOTHING:Int;
 	
 	public var display:Bitmap;
 	public var debugDisplay:Bitmap;
@@ -94,6 +94,36 @@ class MapGenerator {
 		this.showDebug = showDebug;
 		this.minRoomSize = minRoomSize;
 		this.maxRoomSize = maxRoomSize;
+		
+		cNW_CORNER = 0xFFA30008;
+		cNE_CORNER = 0xFFBC2F36;
+		cSE_CORNER = 0xFFFD3F49;
+		cSW_CORNER = 0xFFFD7279;
+		cN_WALL = 0xFF1D0772;
+		cE_WALL = 0xFF3F2D84;
+		cS_WALL = 0xFF6749D7;
+		cW_WALL = 0xFF856FD7;
+		cS_DOOR = 0xFFFFD100;
+		cE_DOOR = 0xFFBFA530;
+		cENTRANCE = 0xFF82217A;
+		cFLOOR = 0xFFFFFFFF;
+		cNOTHING = 0xFF333333;
+		
+		iNW_CORNER = 0;
+		iNE_CORNER = 0;
+		iSE_CORNER = 0;
+		iSW_CORNER = 0;
+		iN_WALL = 0;
+		iE_WALL = 0;
+		iS_WALL = 0;
+		iW_WALL = 0;
+		iS_DOOR = 0;
+		iE_DOOR = 0;
+		iENTRANCE = 0;
+		iFLOOR = 0;
+		iNOTHING = 0;
+		
+		currentRoomEntrance = new Door(0, 0, DoorType.North);
 		init();
 	}
 	
@@ -181,9 +211,6 @@ class MapGenerator {
 		if (showDebug) {
 			debugOverlay = new BitmapData(width, height, true, 0x4400CC00);
 		}
-		//generate();
-		
-		//showColorCodes();
 	}
 	
 	public function showColorCodes():Void {
@@ -199,12 +226,14 @@ class MapGenerator {
 		trace("DOOR EAST (" + iE_DOOR + ") : " + cE_DOOR);
 		trace("ENTRANCE (" + iENTRANCE + ") : " + cENTRANCE);
 		trace("FLOOR (" + iFLOOR + ") : " + cFLOOR);
-		
+		var eSpace:UInt = 0xFF333333;
+		trace("EMPTY SPACE : " + eSpace);
 	}
 	
-	public function showMinimap(parent:DisplayObjectContainer, scale:Int, align:MapAlign):Void {
+	public function showMinimap(parent:DisplayObjectContainer, scale:Int, align:MapAlign, add:Bool = false):Bitmap {
 		display = new Bitmap(map);
-		parent.addChild(display);
+		if (add)
+			parent.addChild(display);
 		
 		if (showDebug) {
 			debugDisplay = new Bitmap(debugOverlay);
@@ -236,6 +265,8 @@ class MapGenerator {
 			debugDisplay.x = display.x;
 			debugDisplay.y = display.y;
 		}
+		
+		return display;
 	}
 	
 	public function generate():Void {
@@ -265,6 +296,7 @@ class MapGenerator {
 			var room:Room = new Room(Std.int(currentRoomEntrance.x), Std.int(currentRoomEntrance.y), Std.int(currentRoomSize.x), Std.int(currentRoomSize.y));
 			
 			room.entrance = currentRoomEntrance;
+			
 			if (numRooms == 0) {
 				if (room.entrance.type == DoorType.North) {
 					room.entrance.x = Std.int(room.originX + (room.width / 2));
@@ -329,21 +361,20 @@ class MapGenerator {
 						doorIndex++;
 					} else {
 						doorIndex = 0;
-						currentRoomEntrance = new Door(unusedDoors[doorIndex].x, unusedDoors[doorIndex].y, unusedDoors[doorIndex].type);
+						//currentRoomEntrance = new Door(unusedDoors[doorIndex].x, unusedDoors[doorIndex].y, unusedDoors[doorIndex].type);
 						totalLoops++;
 					}
 				}
 			}
 		}
 		
-		//trace("TOTAL ROOMS IN THE MAP : " + numRooms);
+		trace("TOTAL ROOMS IN THE MAP : " + numRooms);
 	}
 	
 	private function reduceRoom(room:Room):Bool {
 		//Try to reduce -1w, then -1h, -2w & finally -2h
 		//Then check to see if room is equal or larger than minimal space
 		var minSize = 5;
-		//trace("reduceRoom -> initial room size : " + room.width + "," + room.height);
 		
 		while (room.width > minSize || room.height > minSize) {
 			room.width--;
@@ -463,11 +494,59 @@ class MapGenerator {
 		var h = map.height;
 		mapData = new Array<Array<Int>>();
 		
+		/*
+		cNW_CORNER = 0xFFA30008;
+		cNE_CORNER = 0xFFBC2F36;
+		cSE_CORNER = 0xFFFD3F49;
+		cSW_CORNER = 0xFFFD7279;
+		cN_WALL = 0xFF1D0772;
+		cE_WALL = 0xFF3F2D84;
+		cS_WALL = 0xFF6749D7;
+		cW_WALL = 0xFF856FD7;
+		cS_DOOR = 0xFFFFD100;
+		cE_DOOR = 0xFFBFA530;
+		cENTRANCE = 0xFF82217A;
+		cFLOOR = 0xFFFFFFFF;
+		cNOTHING = 0xFF333333;
+		 * */
 		for (i in 0...h) {
 			mapData[i] = new Array<Int>();
 			for (j in 0...w) {
+				#if (neko || cpp)
+				var pixel:UInt = map.getPixel32(j, i);
+				#elseif flash
 				var pixel:Float = map.getPixel32(j, i);
+				#end
 				switch (pixel) {
+					
+					#if (neko || cpp)
+					case 0xFFA30008: //NW CORNER
+						mapData[i][j] = iNW_CORNER;
+					case 0xFFBC2F36: //NE CORNER
+						mapData[i][j] = iNE_CORNER;
+					case 0xFFFD3F49: //SE CORNER
+						mapData[i][j] = iSE_CORNER;
+					case 0xFFFD7279: //SW CORNER
+						mapData[i][j] = iSW_CORNER;
+					case 0xFF1D0772: //NORTH WALL
+						mapData[i][j] = iN_WALL;
+					case 0xFF3F2D84: //EAST WALL
+						mapData[i][j] = iE_WALL;
+					case 0xFF6749D7: //SOUTH WALL
+						mapData[i][j] = iS_WALL;
+					case 0xFF856FD7: //WEST WALL
+						mapData[i][j] = iW_WALL;
+					case 0xFFFFD100: //SOUTH DOOR
+						mapData[i][j] = iS_DOOR;
+					case 0xFFBFA530: //EAST DOOR
+						mapData[i][j] = iE_DOOR;
+					case 0xFF82217A: //ENTRANCE
+						mapData[i][j] = iENTRANCE;
+					case 0xFFFFFFFF: //GROUND
+						mapData[i][j] = iFLOOR;
+					default: //EMPTY SPACE
+						mapData[i][j] = iNOTHING;
+					#elseif flash
 					case 4288872456: //NW CORNER
 						mapData[i][j] = iNW_CORNER;
 					case 4290522934: //NE CORNER
@@ -494,6 +573,7 @@ class MapGenerator {
 						mapData[i][j] = iFLOOR;
 					default: //EMPTY SPACE
 						mapData[i][j] = iNOTHING;
+					#end
 				}
 			}
 		}
@@ -510,7 +590,7 @@ class MapGenerator {
 		
 		if (endX < 0 || endX > map.width || endY < 0 || endY > map.height) {
 			if (showDebug) {
-				trace("checkRoomSpace -> Room out of boundaries");
+				//trace("checkRoomSpace -> Room out of boundaries");
 				debugOverlay.fillRect(new Rectangle(0, 0, debugOverlay.width, debugOverlay.height), 0x4400CC00);
 				debugOverlay.fillRect(new Rectangle(room.originX, room.originY, room.width, room.height), 0xFFFFFF66);
 			}
@@ -519,9 +599,10 @@ class MapGenerator {
 		
 		for (i in startY...endY) {
 			for (j in startX...endX) {
-				if (map.getPixel32(j, i) != 4281545523) {
+				var pixel:UInt = map.getPixel32(j, i);
+				if (pixel != 4281545523) {
 					if (showDebug) {
-						trace("checkRoomSpace -> Room is overlaping other room");
+						//trace("checkRoomSpace -> Room is overlaping other room");
 						debugOverlay.fillRect(new Rectangle(0, 0, debugOverlay.width, debugOverlay.height), 0x4400CC00);
 						debugOverlay.fillRect(new Rectangle(room.originX, room.originY, room.width, room.height), 0xFFFFFF66);
 					}

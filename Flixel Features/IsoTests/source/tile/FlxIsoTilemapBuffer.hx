@@ -70,7 +70,6 @@ class FlxIsoTilemapBuffer
 		updateRows(TileDepth, HeightInTiles, ScaleY, Camera);
 		
 		#if FLX_RENDER_BLIT
-		//_pixels = new BitmapData(Std.int(columns * TileWidth), Std.int(rows * TileHeight), true, 0);
 		_pixels = new BitmapData(Std.int((columns * TileWidth) / 2 + (rows * TileWidth) / 2), Std.int((columns * TileDepth) / 2 + (rows * TileDepth) / 2) + TileHeight, true, 0);
 		_flashRect = new Rectangle(0, 0, _pixels.width, _pixels.height);
 		_matrix = new Matrix();

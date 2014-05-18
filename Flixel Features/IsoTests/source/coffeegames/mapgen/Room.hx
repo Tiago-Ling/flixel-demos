@@ -22,5 +22,26 @@ class Room
 		originY = y;
 		this.width = width;
 		this.height = height;
+		depth = 0;
+		entrance = null;
+		doors = null;
+		layout = null;
 	}
+	
+/*	public function toString():Void
+	{
+		trace(" ### Room data ### ");
+		trace(" ### Origin : " + originX + "," + originY + " | size : " + width + " x " + height);
+		trace(" ### Depth : " + depth + " | entrance " + entrance);
+		trace(" ### Doors : " + doors + " | layout : ");
+		if (layout != null)
+		{
+			for (i in 0...layout.length)
+			{
+				trace(layout[i]);
+			}
+		} else {
+			trace("layout is null");
+		}
+	}*/
 }

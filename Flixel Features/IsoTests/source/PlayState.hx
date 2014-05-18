@@ -2,10 +2,10 @@ package;
 
 import coffeegames.mapgen.MapAlign;
 import coffeegames.mapgen.MapGenerator;
-import flash.Lib;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxState;
+import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import tile.FlxIsoTilemap;
 
 /**
@@ -16,6 +16,7 @@ class PlayState extends FlxState
 	var mapGen:MapGenerator;
 	var mapHeight:Int;
 	var mapWidth:Int;
+	var map:FlxIsoTilemap;
 	
 	/**
 	 * Function that is called up when to state is created to set it up. 
@@ -27,20 +28,17 @@ class PlayState extends FlxState
 		FlxG.log.redirectTraces = false;
 		FlxG.debugger.visible = true;
 		
-/*		mapWidth = 28;
-		mapHeight = 28;*/
 		mapWidth = 42;
 		mapHeight = 42;
-/*		mapWidth = 56;
-		mapHeight = 56;*/
-/*		mapWidth = 100;
-		mapHeight = 100;*/
 		
 		mapGen = new MapGenerator(mapWidth, mapHeight, 3, 5, 11, false);
 		mapGen.setIndices(9, 8, 10, 11, 14, 16, 17, 15, 7, 5, 1, 1, 0);
 		mapGen.generate();
-		//mapGen.showMinimap(Lib.current, 6, MapAlign.BottomLeft);
-		//mapGen.showColorCodes();
+		
+		//Shows the minimap
+		var minimap = mapGen.showMinimap(FlxG.stage, 6, MapAlign.TopLeft);
+		FlxG.addChildBelowMouse(minimap);
+		mapGen.showColorCodes();
 		
 		var mapData:Array<Array<Int>> = mapGen.extractData();
 		var flixelMapData:Array<Int> = new Array<Int>();
@@ -50,18 +48,32 @@ class PlayState extends FlxState
 			}
 		}
 		
-		var charA = new FlxIsoSprite(0, 0);
+		var charA = new FlxIsoSprite(0, 0, false);
 		
-		var map:FlxIsoTilemap = new FlxIsoTilemap();
+		map = new FlxIsoTilemap();
 		map.widthInTiles = mapWidth;
 		map.heightInTiles = mapHeight;
-		map.loadMap(flixelMapData, "images/tileset.png", 48, 24, 48, 0, 0, 0, 1);
+		map._tileDepth = 24;
+		map.loadMap(flixelMapData, "images/tileset.png", 48, 48, FlxTilemapAutoTiling.OFF, 0, 0, 1);
+		map.adjustTiles();
 		map.setTileProperties(2, FlxObject.ANY, null, null, 16);
-		
+		map.camera.antialiasing = true;
 		map.add(charA);
 		add(map);
 		
-		trace("map position : " + map.x + "," + map.y);
+		var initialTile:IsoRect = map.getIsoRectAt(3 * mapWidth + 3);
+		charA.setPosition(initialTile.isoPos.x, initialTile.isoPos.y);
+		
+		//Adds 10 autonomous moving chars:
+/*		for (i in 0...10)
+		{
+			var char = new FlxIsoSprite(0, 0, true);
+			var startRow:Int = FlxRandom.intRanged(3, mapHeight);
+			var startCol:Int = FlxRandom.intRanged(3, mapWidth);
+			var initialTile:IsoRect = map.getIsoRectAt(startRow * startCol);
+			char.setPosition(initialTile.isoPos.x, initialTile.isoPos.y);
+			map.add(char);
+		}*/
 	}
 	
 	/**
@@ -79,20 +91,11 @@ class PlayState extends FlxState
 	override public function update():Void
 	{
 		super.update();
-		
-/*		if (FlxG.keys.pressed.A)
-			FlxG.camera.scroll.x -= 300 * FlxG.elapsed;
-		if (FlxG.keys.pressed.D)
-			FlxG.camera.scroll.x += 300 * FlxG.elapsed;
-		if (FlxG.keys.pressed.W)
-			FlxG.camera.scroll.y -= 300 * FlxG.elapsed;
-		if (FlxG.keys.pressed.S)
-			FlxG.camera.scroll.y += 300 * FlxG.elapsed;*/
 			
 		if (FlxG.keys.pressed.A)
-			FlxG.camera.scroll.x += 300 * FlxG.elapsed;
-		if (FlxG.keys.pressed.D)
 			FlxG.camera.scroll.x -= 300 * FlxG.elapsed;
+		if (FlxG.keys.pressed.D)
+			FlxG.camera.scroll.x += 300 * FlxG.elapsed;
 		if (FlxG.keys.pressed.W)
 			FlxG.camera.scroll.y += 300 * FlxG.elapsed;
 		if (FlxG.keys.pressed.S)
