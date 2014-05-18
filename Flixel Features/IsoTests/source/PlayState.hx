@@ -28,9 +28,9 @@ class PlayState extends FlxState
 		FlxG.log.redirectTraces = false;
 		FlxG.debugger.visible = true;
 		
+		//Map generator
 		mapWidth = 42;
 		mapHeight = 42;
-		
 		mapGen = new MapGenerator(mapWidth, mapHeight, 3, 5, 11, false);
 		mapGen.setIndices(9, 8, 10, 11, 14, 16, 17, 15, 7, 5, 1, 1, 0);
 		mapGen.generate();
@@ -40,6 +40,7 @@ class PlayState extends FlxState
 		FlxG.addChildBelowMouse(minimap);
 		mapGen.showColorCodes();
 		
+		//Getting data from map generator and conforming it to flixel format
 		var mapData:Array<Array<Int>> = mapGen.extractData();
 		var flixelMapData:Array<Int> = new Array<Int>();
 		for (i in 0...mapData.length) {
@@ -48,8 +49,7 @@ class PlayState extends FlxState
 			}
 		}
 		
-		var charA = new FlxIsoSprite(0, 0, false);
-		
+		//Isometric tilemap
 		map = new FlxIsoTilemap();
 		map.widthInTiles = mapWidth;
 		map.heightInTiles = mapHeight;
@@ -58,9 +58,11 @@ class PlayState extends FlxState
 		map.adjustTiles();
 		map.setTileProperties(2, FlxObject.ANY, null, null, 16);
 		map.camera.antialiasing = true;
-		map.add(charA);
 		add(map);
 		
+		//Adding FlxIsoSprite to the map (WARNING: Currently working on Flash only!)
+		var charA = new FlxIsoSprite(0, 0, false);
+		map.add(charA);
 		var initialTile:IsoRect = map.getIsoRectAt(3 * mapWidth + 3);
 		charA.setPosition(initialTile.isoPos.x, initialTile.isoPos.y);
 		
