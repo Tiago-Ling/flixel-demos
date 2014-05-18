@@ -309,13 +309,14 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 	
 	override private function updateMap():Void 
 	{
+		_rects = new Array<IsoRect>();
+		FlxArrayUtil.setLength(_rects, totalTiles);
+		
 		#if FLX_RENDER_BLIT
 		#if !FLX_NO_DEBUG
 		_debugRect = new Rectangle(0, 0, _tileWidth, (_tileDepth + _tileHeight));
 		#end
 		
-		_rects = new Array<IsoRect>();
-		FlxArrayUtil.setLength(_rects, totalTiles);
 		var i:Int = 0;
 		while (i < totalTiles)
 		{
@@ -946,7 +947,6 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 	 */
 	public function updateFrameData():Void
 	{
-		trace( "cachedGraphics : " + cachedGraphics );
 		if (cachedGraphics != null && _tileWidth >= 1 && _tileHeight >= 1)
 		{
 			framesData = cachedGraphics.tilesheet.getSpriteSheetFrames(region, new Point(0, 0));
