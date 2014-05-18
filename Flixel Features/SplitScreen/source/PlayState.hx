@@ -21,12 +21,14 @@ class PlayState extends FlxState
 	
 	override public function create():Void
 	{
+		FlxG.mouse.visible = false;
+		
 		// Set the background color to white
 		FlxG.cameras.bgColor = FlxColor.WHITE;
 		
 		// Create the tilemap from the levelData we just created
 		_level = new FlxTilemap();
-		_level.loadMap(Assets.getText("assets/level.csv"), FlxTilemap.imgAuto, 0, 0, FlxTilemap.AUTO);
+		_level.loadMap(Assets.getText("assets/level.csv"), GraphicAuto, 0, 0, FlxTilemap.AUTO);
 		add(_level);
 		
 		_halfWidth = Std.int(FlxG.width / 2);
@@ -41,8 +43,8 @@ class PlayState extends FlxState
 		add(_player2);
 		
 		// Then we setup two cameras to follow each of the two players
-		createCamera(_halfWidth, 0xFFCCCC, _player1);
-		createCamera(0, 0xCCCCFF, _player2);
+		createCamera(_halfWidth, 0xFFFFCCCC, _player1);
+		createCamera(0, 0xFFCCCCFF, _player2);
 		
 		// Some instructions
 		var textBG:FlxSprite = new FlxSprite(0, _textY);
@@ -64,7 +66,6 @@ class PlayState extends FlxState
 		player.makeGraphic(10, 12, Color);
 		player.maxVelocity.set(100, 200);
 		player.acceleration.y = 200;
-		player.forceComplexRender = true;
 		player.drag.x = player.maxVelocity.x * 4;
 		
 		return player;
@@ -74,7 +75,7 @@ class PlayState extends FlxState
 	{
 		var camera:FlxCamera = new FlxCamera(X, 0, _halfWidth, _textY);
 		camera.setBounds(0, 0, _level.width - 8, _textY);
-		camera.color = Color;
+		camera.bgColor = Color;
 		camera.follow(Follow);
 		FlxG.cameras.add(camera);
 	}

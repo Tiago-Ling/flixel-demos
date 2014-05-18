@@ -1,12 +1,10 @@
 package;
 
-import flixel.addons.plugin.effects.FlxSpecialFX;
-import flixel.addons.plugin.effects.fx.StarfieldFX;
+import flixel.addons.display.FlxStarField.FlxStarField2D;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
-import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxTypedGroup;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
@@ -20,8 +18,8 @@ import flixel.util.FlxTimer;
  */
 class PlayState extends FlxState
 {
-	static public var asteroids:FlxTypedGroup<Asteroid>;
-	static public var bullets:FlxTypedGroup<FlxSprite>;
+	public static var asteroids:FlxTypedGroup<Asteroid>;
+	public static var bullets:FlxTypedGroup<FlxSprite>;
 	
 	private var _playerShip:PlayerShip;
 	private var _scoreText:FlxText;
@@ -30,12 +28,10 @@ class PlayState extends FlxState
 	
 	override public function create():Void 
 	{
-		FlxG.mouse.hide();
+		FlxG.mouse.visible = false;
 		
 		// Create a starfield
-		FlxG.plugins.add(new FlxSpecialFX());
-		var starfield:StarfieldFX = FlxSpecialFX.starfield();
-		add(starfield.create(0, 0, FlxG.width, FlxG.height, 200, StarfieldFX.STARFIELD_TYPE_2D));
+		add(new FlxStarField2D());
 		
 		// Spawn 3 asteroids for a start
 		asteroids = new FlxTypedGroup<Asteroid>();
@@ -47,7 +43,7 @@ class PlayState extends FlxState
 		}
 		
 		// Make sure we don't ever run out of asteroids! :)
-		resetTimer();
+		resetTimer(new FlxTimer());
 		
 		// Create the player ship
 		_playerShip = new PlayerShip();
@@ -86,7 +82,6 @@ class PlayState extends FlxState
 		_playerShip = null; 
 		bullets = null;
 		asteroids = null;
-		FlxSpecialFX.clear();
 	}
 	
 	override public function update():Void 
@@ -118,7 +113,7 @@ class PlayState extends FlxState
 		{
 			if (bullet.exists)
 			{
-				FlxSpriteUtil.screenWrap(cast (bullet,FlxSprite));
+				FlxSpriteUtil.screenWrap(bullet);
 			}
 		}
 	}
@@ -128,7 +123,7 @@ class PlayState extends FlxState
 		_score += Amount;
 		_scoreText.text = "Score: " + _score;
 		_scoreText.alpha = 0;
-		FlxTween.multiVar(_scoreText, { alpha:1 }, 0.5);
+		FlxTween.tween(_scoreText, { alpha: 1 }, 0.5);
 	}
 	
 	private function bulletHitsAsteroid(Object1:FlxObject, Object2:FlxObject):Void
@@ -146,9 +141,9 @@ class PlayState extends FlxState
 		_scoreText.text = "Game Over! Final score: " + _score + " - Press R to retry.";
 	}
 	
-	private function resetTimer(?Timer:FlxTimer):Void
+	private function resetTimer(Timer:FlxTimer):Void
 	{
-		FlxTimer.start(5, resetTimer);
+		Timer.start(5, resetTimer);
 		spawnAsteroid();
 	}
 	

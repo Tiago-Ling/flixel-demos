@@ -16,7 +16,7 @@ import openfl.Assets;
  */
 class PlayState extends FlxState
 {
-	static private var _justDied:Bool = false;
+	private static var _justDied:Bool = false;
 	
 	private var _level:FlxTilemap;
 	private var _player:FlxSprite;
@@ -27,10 +27,11 @@ class PlayState extends FlxState
 	
 	override public function create():Void 
 	{
+		FlxG.mouse.visible = false;
 		FlxG.cameras.bgColor = 0xffaaaaaa;
 		
 		_level = new FlxTilemap();
-		_level.loadMap(Assets.getText("assets/level.csv"), FlxTilemap.imgAuto, 0, 0, FlxTilemap.AUTO);
+		_level.loadMap(Assets.getText("assets/level.csv"), GraphicAuto, 0, 0, FlxTilemap.AUTO);
 		add(_level);
 		
 		// Create the _level _exit
@@ -98,8 +99,6 @@ class PlayState extends FlxState
 		_player.maxVelocity.set(80, 200);
 		_player.acceleration.y = 200;
 		_player.drag.x = _player.maxVelocity.x * 4;
-		// Smoother movement by enabling subpixel rendering
-		_player.forceComplexRender = true;
 		add(_player);
 		
 		_scoreText = new FlxText(2, 2, 80, "SCORE: " + (_coins.countDead() * 100));
@@ -121,17 +120,17 @@ class PlayState extends FlxState
 	{
 		_player.acceleration.x = 0;
 		
-		if (FlxG.keyboard.pressed("LEFT", "A"))
+		if (FlxG.keys.anyPressed(["LEFT", "A"]))
 		{
 			_player.acceleration.x = -_player.maxVelocity.x * 4;
 		}
 		
-		if (FlxG.keyboard.pressed("RIGHT", "D"))
+		if (FlxG.keys.anyPressed(["RIGHT", "D"]))
 		{
 			_player.acceleration.x = _player.maxVelocity.x * 4;
 		}
 		
-		if (FlxG.keyboard.justPressed("SPACE", "UP", "W") && _player.isTouching(FlxObject.FLOOR))
+		if (FlxG.keys.anyJustPressed(["SPACE", "UP", "W"]) && _player.isTouching(FlxObject.FLOOR))
 		{
 			_player.velocity.y = -_player.maxVelocity.y / 2;
 		}

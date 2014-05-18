@@ -18,13 +18,13 @@ class Card extends FlxNapeSprite
 	/**
 	 * How long the turning animation takes
 	 */
-	inline static private var TURNING_TIME:Float = 0.2;
+	private static inline var TURNING_TIME:Float = 0.2;
 	
 	/**
 	 * This is a helper Array to keep track of the cards that have 
 	 * been picked so far, to avoid the same card being shown twice!
 	 */
-	static public var pickedCards:Array<Int> = new Array<Int>();
+	public static var pickedCards:Array<Int> = new Array<Int>();
 	
 	/**
 	 * Whether the card has been turned around yet or not
@@ -34,7 +34,7 @@ class Card extends FlxNapeSprite
 	public function new(X:Int, Y:Int, OffsetX:Int, OffsetY:Int, Index:Int):Void
 	{
 		super(X + OffsetX * Index, Y + OffsetY * Index);
-		loadGraphic("assets/Deck.png", true, false, 123, 123);
+		loadGraphic("assets/Deck.png", true, 123, 123);
 		
 		// The card starts out being turned around
 		animation.frameIndex = 54;
@@ -47,7 +47,7 @@ class Card extends FlxNapeSprite
 		body.setShapeFilters(new InteractionFilter(2, ~2));
 		
 		// Setup the mouse events
-		MouseEventManager.addSprite(this, onDown, null, onOver, onOut);
+		MouseEventManager.add(this, onDown, null, onOver, onOut);
 	}
 	
 	private function onDown(Sprite:FlxSprite)
@@ -56,7 +56,7 @@ class Card extends FlxNapeSprite
 		if (!_turned)
 		{
 			_turned = true;
-			FlxTween.multiVar(scale, { x: 0 }, TURNING_TIME / 2, { complete: pickCard } );
+			FlxTween.tween(scale, { x: 0 }, TURNING_TIME / 2, { complete: pickCard });
 		}
 		
 		var body:Body = cast(Sprite, FlxNapeSprite).body;
@@ -89,6 +89,13 @@ class Card extends FlxNapeSprite
 		pickedCards.push(animation.frameIndex);
 		
 		// Finish the card animation
-		FlxTween.multiVar(scale, { x: 1 }, TURNING_TIME / 2);
+		FlxTween.tween(scale, { x: 1 }, TURNING_TIME / 2);
+	}
+	
+	override public function destroy():Void 
+	{
+		// Make sure that this object is removed from the MouseEventManager for GC
+		MouseEventManager.remove(this);
+		super.destroy();
 	}
 }

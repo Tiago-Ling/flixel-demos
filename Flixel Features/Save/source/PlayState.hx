@@ -12,7 +12,7 @@ import flixel.util.FlxSave;
 
 class PlayState extends FlxState
 {
-	inline static private var NUM_BOXES:Int = 20;
+	private static inline var NUM_BOXES:Int = 20;
 	
 	// Here's the FlxSave variable this is what we're going to be saving to.
 	private var _gameSave:FlxSave;
@@ -35,9 +35,6 @@ class PlayState extends FlxState
 	
 	override public function create():Void
 	{
-		// Let's re show the cursors
-		FlxG.mouse.show();
-		
 		// So here's the core of this demo - the FlxSave you have to instantiate a new one before you can use it
 		_gameSave = new FlxSave();
 		// And then you have to bind it to the save data, you can use different bind strings in different parts of your game
@@ -56,7 +53,7 @@ class PlayState extends FlxState
 		add(dragText);
 		
 		//Set out offset to non-null here
-		dragOffset = new FlxPoint(0, 0);
+		dragOffset = FlxPoint.get(0, 0);
 		
 		//Make a group to place the boxes in
 		_boxGroup = new FlxTypedGroup<FlxButton>();
@@ -167,7 +164,7 @@ class PlayState extends FlxState
 			for (i in 0...NUM_BOXES) 
 			{
 				var box:FlxButton = _boxGroup.members[i];
-				_gameSave.data.boxPositions.push(new FlxPoint(box.x, box.y));
+				_gameSave.data.boxPositions.push(FlxPoint.get(box.x, box.y));
 			}
 			
 			_topText.text = "Created a new save, and saved positions";
@@ -183,7 +180,7 @@ class PlayState extends FlxState
 			for (i in 0...NUM_BOXES) 
 			{
 				var box:FlxButton = _boxGroup.members[i], FlxButton;
-				_gameSave.data.boxPositions[tempCount] = new FlxPoint(box.x, box.y);
+				_gameSave.data.boxPositions[tempCount] = FlxPoint.get(box.x, box.y);
 				tempCount++;
 			}
 			

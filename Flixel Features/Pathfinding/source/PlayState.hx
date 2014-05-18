@@ -17,26 +17,26 @@ class PlayState extends FlxState
 	/**
 	 * Tile width
 	 */
-	inline static private var TILE_WIDTH:Int = 12;
+	private static inline var TILE_WIDTH:Int = 12;
 	/**
 	 * Tile height
 	 */
-	inline static private var TILE_HEIGHT:Int = 12;
+	private static inline var TILE_HEIGHT:Int = 12;
 	/**
 	 * Unit value for action go
 	 */
-	inline static private var ACTION_GO:Int = 1;
+	private static inline var ACTION_GO:Int = 1;
 	/**
 	 * Unit value for action idle
 	 */
-	inline static private var ACTION_IDLE:Int = 0;
+	private static inline var ACTION_IDLE:Int = 0;
 	/**
 	 * Unit move speed
 	 */
-	inline static private var MOVE_SPEED:Int = 50;
+	private static inline var MOVE_SPEED:Int = 50;
 	
-	inline static private var INSTRUCTION_1:String = "Click in map to place or remove a tile.";
-	inline static private var INSTRUCTION_2:String = "No path found!";
+	private static inline var INSTRUCTION_1:String = "Click in map to place or remove a tile.";
+	private static inline var INSTRUCTION_2:String = "No path found!";
 	
 	/**
 	 * Map
@@ -82,9 +82,6 @@ class PlayState extends FlxState
 	
 	override public function create():Void
 	{
-		FlxG.cameras.bgColor = FlxColor.BLACK;
-		FlxG.mouse.show();
-		
 		// Load _datamap to _map and add to PlayState
 		_map = new FlxTilemap();
 		_map.loadMap(Assets.getText("assets/pathfinding_map.txt"), "assets/tiles.png", TILE_WIDTH, TILE_HEIGHT, 0, 1);
@@ -134,8 +131,7 @@ class PlayState extends FlxState
 		var legends:FlxText = new FlxText(textX, 140, textWidth, "Legends:\nRed: Unit\nYellow: Goal\nBlue: Wall\nWhite: Path");
 		add(legends);
 		
-		path = FlxPath.recycle();
-		path.usePooling = false;
+		path = new FlxPath();
 	}
 	
 	override public function destroy():Void
@@ -156,7 +152,7 @@ class PlayState extends FlxState
 		super.draw();
 		
 		// To draw path
-		if (!path.finished)
+		if ((path != null) && !path.finished)
 		{
 			path.drawDebug();
 		}
@@ -194,12 +190,12 @@ class PlayState extends FlxState
 	private function moveToGoal():Void
 	{
 		// Find path to goal from unit to goal
-		var pathPoints:Array<FlxPoint> = _map.findPath(new FlxPoint(_unit.x + _unit.width / 2, _unit.y + _unit.height / 2), new FlxPoint(_goal.x + _goal.width / 2, _goal.y + _goal.height / 2));
+		var pathPoints:Array<FlxPoint> = _map.findPath(FlxPoint.get(_unit.x + _unit.width / 2, _unit.y + _unit.height / 2), FlxPoint.get(_goal.x + _goal.width / 2, _goal.y + _goal.height / 2));
 		
 		// Tell unit to follow path
 		if (pathPoints != null) 
 		{
-			path.run(_unit, pathPoints);
+			path.start(_unit, pathPoints);
 			_action = ACTION_GO;
 			_instructions.text = INSTRUCTION_1;
 		}
@@ -213,7 +209,7 @@ class PlayState extends FlxState
 	{
 		// Stop unit and destroy unit path
 		_action = ACTION_IDLE;
-		path.abort();
+		path.cancel();
 		_unit.velocity.x = _unit.velocity.y = 0;
 	}
 	

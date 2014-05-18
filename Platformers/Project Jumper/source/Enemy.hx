@@ -13,11 +13,11 @@ import flixel.FlxSprite;
  */
 class Enemy extends EnemyTemplate 
 {
-	inline static public var RUN_SPEED:Int = 60;
-	inline static public var GRAVITY:Int = 0;
-	inline static public var JUMP_SPEED:Int = 60;
-	inline static public var HEALTH:Int = 1;
-	inline static public var SPAWNTIME:Float = 30;
+	public static inline var RUN_SPEED:Int = 60;
+	public static inline var GRAVITY:Int = 0;
+	public static inline var JUMP_SPEED:Int = 60;
+	public static inline var HEALTH:Int = 1;
+	public static inline var SPAWNTIME:Float = 30;
 	
 	private var _gibs:FlxEmitter;
 	private var _spawntimer:Float;
@@ -30,7 +30,8 @@ class Enemy extends EnemyTemplate
 		_spawntimer = 0;
 		
 		// Set up the graphics
-		loadGraphic("assets/art/spikemonsta.png", true, true); 
+		loadGraphic("assets/art/spikemonsta.png", true); 
+		
 		animation.add("walking", [0, 1], 10, true);
 		animation.add("idle", [0]);
 		

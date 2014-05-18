@@ -8,11 +8,14 @@ import flixel.text.FlxText;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxPath;
 import flixel.util.FlxPoint;
+import flixel.util.FlxStringUtil;
 
 class PlayState extends FlxState
 {
 	override public function create():Void
 	{			
+		FlxG.mouse.visible = false;
+		
 		// Background
 		FlxG.state.bgColor = 0xffacbcd7;
 		var decoration:FlxSprite = new FlxSprite(256, 159, "assets/bg.png");
@@ -31,7 +34,7 @@ class PlayState extends FlxState
 		sprite.immovable = true;
 		destination = sprite.getMidpoint();
 		destination.y += 112;
-		path = FlxPath.start(sprite, [sprite.getMidpoint(),destination], 40, FlxPath.YOYO);
+		path = new FlxPath(sprite, [sprite.getMidpoint(), destination], 40, FlxPath.YOYO);
 		add(sprite);
 		
 		// Create the side-to-side pusher object and put it on a different path
@@ -39,7 +42,7 @@ class PlayState extends FlxState
 		sprite.immovable = true;
 		destination = sprite.getMidpoint();
 		destination.x += 56;
-		var path:FlxPath = FlxPath.start(sprite, [sprite.getMidpoint(),destination], 40, FlxPath.YOYO);
+		var path = new FlxPath(sprite, [sprite.getMidpoint(), destination], 40, FlxPath.YOYO);
 		add(sprite);
 		
 		// Then add the player, its own class with its own logic
@@ -48,11 +51,11 @@ class PlayState extends FlxState
 		
 		// Then create the crates that are sprinkled around the level
 		var crates:Array<FlxPoint> = [
-			new FlxPoint(64, 208),
-			new FlxPoint(108, 176),
-			new FlxPoint(140, 176),
-			new FlxPoint(192, 208),
-			new FlxPoint(272, 48)];
+			FlxPoint.get(64, 208),
+			FlxPoint.get(108, 176),
+			FlxPoint.get(140, 176),
+			FlxPoint.get(192, 208),
+			FlxPoint.get(272, 48)];
 		
 		for (i in 0...crates.length)
 		{
@@ -76,26 +79,22 @@ class PlayState extends FlxState
 		
 		// Basic level structure
 		var level:FlxTilemap = new FlxTilemap();
-		level.loadMap(FlxTilemap.imageToCSV("assets/map.png", false, 2), "assets/tiles.png", 0, 0, FlxTilemap.ALT);
+		level.loadMap(FlxStringUtil.imageToCSV("assets/map.png", false, 2), "assets/tiles.png", 0, 0, FlxTilemap.ALT);
 		level.follow();
 		add(level);
 		
 		// Library label in upper left
-		var tx:FlxText;
-		tx = new FlxText(2, 0, Std.int(FlxG.width / 2), FlxG.libraryName);
-		tx.scrollFactor.x = tx.scrollFactor.y = 0;
+		var tx:FlxText = new FlxText(2, 0, Std.int(FlxG.width / 2), Std.string(FlxG.VERSION));
+		tx.scrollFactor.set(0, 0);
+		tx.setBorderStyle(FlxText.BORDER_SHADOW, 0x233e58);
 		tx.color = 0x778ea1;
-		//tx.shadow = 0x233e58;
-		//tx.useShadow = true;
 		add(tx);
 		
 		// Instructions
 		tx = new FlxText(2, FlxG.height - 12, FlxG.width, "Interact with ARROWS / WASD, or press ENTER for next demo.");
-		tx.scrollFactor.x = tx.scrollFactor.y = 0;
-		tx.color = 0x778ea1;
-		//tx.shadow = 0x233e58;
-		//tx.useShadow = true;
-		tx.alignment = "center";
+		tx.scrollFactor.set(0, 0);
+		tx.setBorderStyle(FlxText.BORDER_SHADOW, 0x233e58);
+		tx.setFormat(null, 8, 0x778ea1, "center");
 		add(tx);
 	}
 	

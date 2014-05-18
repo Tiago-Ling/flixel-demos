@@ -11,14 +11,14 @@ import flixel.util.FlxSpriteUtil;
  */
 class Lurker extends EnemyTemplate 
 {
-	inline static public var RUN_SPEED:Int = 30;
-	inline static public var GRAVITY:Int = 300;
-	inline static public var HEALTH:Int = 2;
-	inline static public var SPAWNTIME:Float = 45;
-	inline static public var JUMP_SPEED:Int = 60;
-	inline static public var BURNTIME:Int = 5;
-	inline static public var GUN_DELAY:Int = 1;
-	inline static public var BULLET_SPEED:Int =100;
+	public static inline var RUN_SPEED:Int = 30;
+	public static inline var GRAVITY:Int = 300;
+	public static inline var HEALTH:Int = 2;
+	public static inline var SPAWNTIME:Float = 45;
+	public static inline var JUMP_SPEED:Int = 60;
+	public static inline var BURNTIME:Int = 5;
+	public static inline var GUN_DELAY:Int = 1;
+	public static inline var BULLET_SPEED:Int =100;
 	
 	private var _spawntimer:Float;
 	private var _burntimer:Float;
@@ -36,7 +36,8 @@ class Lurker extends EnemyTemplate
 		_bullets = Bullets;
 		_cooldown = 0;
 		
-		loadGraphic("assets/art/lurkmonsta.png", true, true, 16, 17);
+		loadGraphic("assets/art/lurkmonsta.png", true, 16, 17);
+		
 		animation.add("walking", [0, 1], 18, true);
 		animation.add("burning", [2, 3], 18, true);
 		animation.add("wrecked", [4, 5], 18, true);
@@ -186,7 +187,7 @@ class Lurker extends EnemyTemplate
 				bulletX += Math.floor(width - 8);
 			}
 			
-			bullet.angleshoot(bulletX, bulletY, BULLET_SPEED, new FlxPoint(P.x, P.y));
+			bullet.angleshoot(bulletX, bulletY, BULLET_SPEED, FlxPoint.get(P.x, P.y));
 			FlxG.sound.play("assets/sounds/badshoot" + Reg.SoundExtension, 1, false);
 			// reset the shot clock
 			_cooldown = 0; 
