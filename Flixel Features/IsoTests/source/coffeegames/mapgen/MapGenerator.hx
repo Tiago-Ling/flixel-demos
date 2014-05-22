@@ -287,10 +287,7 @@ class MapGenerator {
 			
 			if (showDebug) {
 				trace("Current room entrance : (" + currentRoomEntrance.x + "," + currentRoomEntrance.y + ")");
-				//debugOverlay.setPixel32(currentRoomEntrance.x, currentRoomEntrance.y, 0x22FF00FF);
-				trace("Current room size : " + currentRoomSize.toString());
-/*				debugOverlay.fillRect(new Rectangle(0, 0, debugOverlay.width, debugOverlay.height), 0x4400CC00);
-				debugOverlay.fillRect(new Rectangle(currentRoomEntrance.x, currentRoomEntrance.y, currentRoomSize.x, currentRoomSize.y), 0x22FFFF66);*/
+				//trace("Current room size : " + currentRoomSize.toString());
 			}
 			
 			var room:Room = new Room(Std.int(currentRoomEntrance.x), Std.int(currentRoomEntrance.y), Std.int(currentRoomSize.x), Std.int(currentRoomSize.y));
@@ -512,14 +509,14 @@ class MapGenerator {
 		for (i in 0...h) {
 			mapData[i] = new Array<Int>();
 			for (j in 0...w) {
-				#if (neko || cpp)
+				#if (neko || cpp || html5)
 				var pixel:UInt = map.getPixel32(j, i);
 				#elseif flash
 				var pixel:Float = map.getPixel32(j, i);
 				#end
 				switch (pixel) {
 					
-					#if (neko || cpp)
+					#if (neko || cpp || html5)
 					case 0xFFA30008: //NW CORNER
 						mapData[i][j] = iNW_CORNER;
 					case 0xFFBC2F36: //NE CORNER

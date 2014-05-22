@@ -218,6 +218,8 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 		// need to destroy FlxCallbackPoints
 		scale = FlxDestroyUtil.destroy(scale);
 		
+		FlxG.signals.gameResized.remove(onGameResize);
+		
 		super.destroy();
 	}
 	
@@ -356,13 +358,13 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 				if (rect.depth == -1) {
 					rect.setIso(_flashPoint.x, _flashPoint.y);
 					rect.depth = Std.int(_flashPoint.y * rect.depthModifier + _flashPoint.x);
+					rect.index = _data[columnIndex];
 				}
 				
 				column++;
 				columnIndex++;
 			}
 			
-			_flashPoint.y += _tileHeight;
 			_flashPoint.y += (_tileDepth + _tileHeight);
 			
 			rowIndex += widthInTiles;
@@ -483,7 +485,7 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 		_point.x = (Camera.scroll.x * scrollFactor.x) - x; 
 		_point.y = (Camera.scroll.y * scrollFactor.y) - y;
 		var screenXInTiles:Int = Math.floor(_point.x / _scaledTileWidth);
-		var screenYInTiles:Int = Math.floor(_point.y / _scaledTileHeight);
+		var screenYInTiles:Int = Math.floor(_point.y / _scaledTileDepth);
 		var screenRows:Int = buffer.rows;
 		var screenColumns:Int = buffer.columns;
 		
@@ -513,53 +515,33 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 		var tile:FlxIsoTile;
 		var debugTile:BitmapData;
 		
-		while (row < screenRows)
-		{
-			columnIndex = rowIndex;
-			column = 0;
-			_flashPoint.x = 0;
+		var totalRects:Int = _rects.length;
+		for (i in 0...totalRects) {
+			drawX = _rects[i].isoPos.x - _point.x;
+			drawY = _rects[i].isoPos.y + _point.y;
 			
-			while (column < screenColumns)
+			tile = _tileObjects[_rects[i].index];
+			
+			if (tile != null)
 			{
-				tileID = _rectIDs[columnIndex];
-				
-				if (tileID != -1)
+				if (tile.allowCollisions <= FlxObject.NONE)
 				{
-					drawX = _helperPoint.x + (columnIndex % widthInTiles) * _scaledTileWidth;
-					drawY = _helperPoint.y + Math.floor(columnIndex / widthInTiles) * _scaledTileHeight;
-					
-					tile = _tileObjects[_data[columnIndex]];
-					
-					if (tile != null)
-					{
-						if (tile.allowCollisions <= FlxObject.NONE)
-						{
-							debugColor = FlxColor.BLUE;
-						}
-						else if (tile.allowCollisions != FlxObject.ANY)
-						{
-							debugColor = FlxColor.PINK;
-						}
-						else
-						{
-							debugColor = FlxColor.GREEN;
-						}
-						
-						// Copied from makeDebugTile
-						var gfx:Graphics = Camera.debugLayer.graphics;
-						gfx.lineStyle(1, debugColor, 0.5);
-						gfx.drawRect(drawX, drawY, _scaledTileWidth, _scaledTileHeight);
-					}
+					debugColor = FlxColor.BLUE;
+				}
+				else if (tile.allowCollisions != FlxObject.ANY)
+				{
+					debugColor = FlxColor.PINK;
+				}
+				else
+				{
+					debugColor = FlxColor.GREEN;
 				}
 				
-				_flashPoint.x += _scaledTileWidth;
-				column++;
-				columnIndex++;
+				// Copied from makeDebugTile
+				var gfx:Graphics = Camera.debugLayer.graphics;
+				gfx.lineStyle(1, debugColor, 0.5);
+				gfx.drawRect(drawX, drawY, _scaledTileWidth, _scaledTileDepth + _scaledTileHeight);
 			}
-			
-			rowIndex += widthInTiles;
-			_flashPoint.y += _scaledTileHeight;
-			row++;
 		}
 		#end
 	}
@@ -599,23 +581,12 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 			buffer = _buffers[i++];
 			buffer.dirty = true;
 			#if FLX_RENDER_BLIT
-			if (!buffer.dirty)
-			{
-				// Copied from getScreenXY()
-				_point.x = x - (camera.scroll.x * scrollFactor.x) + buffer.x; 
-				_point.y = y - (camera.scroll.y * scrollFactor.y) + buffer.y;
-				buffer.dirty = (_point.x > 0) || (_point.y > 0) || (_point.x + buffer.width < camera.width) || (_point.y + buffer.height < camera.height);
-			}
-			
 			if (buffer.dirty)
 			{
 				drawTilemap(buffer, camera);
 				buffer.dirty = false;
 			}
 			
-			// Copied from getScreenXY()
-			_flashPoint.x = x - (camera.scroll.x * scrollFactor.x) + buffer.x; 
-			_flashPoint.y = y - (camera.scroll.y * scrollFactor.y) + buffer.y;
 			buffer.draw(camera, _flashPoint, scale.x, scale.y);
 			#else
 			drawTilemap(buffer, camera);
@@ -695,8 +666,14 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 			
 			while (column < selectionWidth)
 			{
-				var dataIndex:Int = _data[rowStart + column];
+				var index:Int = rowStart + column;
+				if ((index < 0) || (index > _data.length - 1))
+				{
+					column++;
+					continue;
+				}
 				
+				var dataIndex:Int = _data[index];
 				if (dataIndex < 0)
 				{
 					column++;
@@ -863,6 +840,9 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 		var tileY:Int;
 		var i:Int = 0;
 		
+		Start.putWeak();
+		End.putWeak();
+		
 		while (i < steps)
 		{
 			curX += stepX;
@@ -901,11 +881,13 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 				
 				if ((ry > tileY) && (ry < tileY + _scaledTileHeight))
 				{
-					if (Result != null)
+					if (Result == null)
 					{
-						Result.x = rx;
-						Result.y = ry;
+						Result = FlxPoint.get();
 					}
+					
+					Result.x = rx;
+					Result.y = ry;
 					
 					return false;
 				}
@@ -923,12 +905,14 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 				
 				if ((rx > tileX) && (rx < tileX + _scaledTileWidth))
 				{
-					if (Result != null)
+					if (Result == null)
 					{
-						Result.x = rx;
-						Result.y = ry;
+						Result = FlxPoint.get();
 					}
 					
+					Result.x = rx;
+					Result.y = ry;
+
 					return false;
 				}
 				
@@ -979,10 +963,7 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 		var rect:Rectangle = null;
 		
 		rect = _rects[rowIndex];
-		#if FLX_RENDER_BLIT
-		//rect = _rects[rowIndex];
-		#else
-		
+		#if FLX_RENDER_TILE
 		var tile:FlxIsoTile = _tileObjects[_data[rowIndex]];
 		
 		if ((tile == null) || !tile.visible)
@@ -1132,34 +1113,17 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 				
 				if (isTileOnScreen(drawPt, Camera))
 				{
-					
-					if (_flashRect.sprite == null) {
-						#if FLX_RENDER_BLIT
+					#if FLX_RENDER_BLIT
+					if (_flashRect.sprite == null) 
+					{
 						Buffer.pixels.copyPixels(cachedGraphics.bitmap, _flashRect, drawPt , null, null, true);
-						#else
-						currDrawData[currIndex++] = drawPt.x;
-						currDrawData[currIndex++] = drawPt.y;
-						currDrawData[currIndex++] = _flashRect.index;
-						
-						// Tilemap tearing hack
-						currDrawData[currIndex++] = hackScaleX; 
-						currDrawData[currIndex++] = 0;
-						currDrawData[currIndex++] = 0;
-						// Tilemap tearing hack
-						currDrawData[currIndex++] = hackScaleY; 
-						
-						// Alpha
-						currDrawData[currIndex++] = 1.0;
-						
-						#end
 					} else {
 						_flashRect.sprite.draw();
-						#if FLX_RENDER_BLIT
 						Buffer.pixels.copyPixels(_flashRect.sprite.framePixels, _flashRect, drawPt, null, null, true);
-						#else
+					}
+					#else
 						currDrawData[currIndex++] = drawPt.x;
 						currDrawData[currIndex++] = drawPt.y;
-						//TODO: Sprite graphic must be added into the tilesheet in order to drawn in cpp / neko
 						currDrawData[currIndex++] = _flashRect.index;
 						
 						// Tilemap tearing hack
@@ -1171,13 +1135,12 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 						
 						// Alpha
 						currDrawData[currIndex++] = 1.0;
-						#end
-					}
+					#end
 					
 					#if (FLX_RENDER_BLIT && !FLX_NO_DEBUG)
 					if (FlxG.debugger.drawDebug && !ignoreDrawDebug) 
 					{
-						tile = _tileObjects[_data[i]];
+						tile = _tileObjects[_flashRect.index];
 						
 						if (tile != null)
 						{
@@ -1197,7 +1160,7 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 								debugTile = _debugTileSolid; 
 							}
 							
-							Buffer.pixels.copyPixels(debugTile, _debugRect, _flashPoint, null, null, true);
+							Buffer.pixels.copyPixels(debugTile, _debugRect, drawPt, null, null, true);
 						}
 					}
 					#end
@@ -1236,8 +1199,8 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 		gfx.moveTo(0, 0);
 		gfx.lineStyle(1, Color, 0.5);
 		gfx.lineTo(_tileWidth - 1, 0);
-		gfx.lineTo(_tileWidth - 1, _tileHeight - 1);
-		gfx.lineTo(0, _tileHeight - 1);
+		gfx.lineTo(_tileWidth - 1, (_tileDepth + _tileHeight) - 1);
+		gfx.lineTo(0, (_tileDepth + _tileHeight) - 1);
 		gfx.lineTo(0, 0);
 		
 		debugTile.draw(FlxSpriteUtil.flashGfxSprite);
@@ -1380,6 +1343,7 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 	private function setScaleYCallback(Scale:FlxPoint):Void
 	{
 		_scaledTileHeight = _tileHeight * scale.y;
+		_scaledTileDepth = _tileDepth * scale.y;
 		height = heightInTiles * _scaledTileHeight;
 		
 		if (cameras != null)
