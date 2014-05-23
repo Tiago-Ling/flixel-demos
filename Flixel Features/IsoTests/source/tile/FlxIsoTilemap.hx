@@ -76,9 +76,7 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 	/**
 	 * Internal representation of rectangles, one for each tile in the entire tilemap, used to speed up drawing.
 	 */
-	//#if FLX_RENDER_BLIT
 	private var _rects:Array<IsoRect>;
-	//#end
 	/**
 	 * Internal, the width of a single tile.
 	 */
@@ -1045,12 +1043,7 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 	#if FLX_RENDER_BLIT
 		Buffer.fill();
 	#else
-		_helperPoint.x = x - Camera.scroll.x * scrollFactor.x; //copied from getScreenXY()
-		_helperPoint.y = y - Camera.scroll.y * scrollFactor.y;
-		
 		var tileID:Int;
-		var drawX:Float;
-		var drawY:Float;
 		
 		var hackScaleX:Float = tileScaleHack * scale.x;
 		var hackScaleY:Float = tileScaleHack * scale.y;
@@ -1064,34 +1057,6 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 		_point.x = (Camera.scroll.x * scrollFactor.x) - x; //modified from getScreenXY()
 		_point.y = (Camera.scroll.y * scrollFactor.y) - y;
 		
-		var screenXInTiles:Int = Math.floor(_point.x / _scaledTileWidth);
-		var screenYInTiles:Int = Math.floor(_point.y / _scaledTileDepth);
-		var screenRows:Int = Buffer.rows;
-		var screenColumns:Int = Buffer.columns;
-		
-		// Bound the upper left corner
-		if (screenXInTiles < 0)
-		{
-			screenXInTiles = 0;
-		}
-		if (screenXInTiles > widthInTiles - screenColumns)
-		{
-			screenXInTiles = widthInTiles - screenColumns;
-		}
-		if (screenYInTiles < 0)
-		{
-			screenYInTiles = 0;
-		}
-		if (screenYInTiles > heightInTiles - screenRows)
-		{
-			screenYInTiles = heightInTiles - screenRows;
-		}
-		
-		var rowIndex:Int = screenYInTiles * widthInTiles + screenXInTiles;
-		_flashPoint.y = 0;
-		var row:Int = 0;
-		var column:Int;
-		var columnIndex:Int;
 		var tile:FlxIsoTile;
 		
 		#if !FLX_NO_DEBUG
@@ -1099,9 +1064,9 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 		#end 
 		
 		var totalRects:Int = _rects.length;
-		for (i in 0...totalRects){
-			var _flashRect:IsoRect = _rects[i];
-			
+		for (i in 0...totalRects)
+		{
+			_flashRect = _rects[i];
 			if (_flashRect != null)
 			{
 				drawPt.x = _flashRect.isoPos.x - _point.x;
@@ -1111,12 +1076,12 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 				tileID = _rectIDs[i];
 				#end
 				
-				if (isTileOnScreen(drawPt, Camera))
+				if (isTileOnScreen(drawPt, Camera, _scaledTileWidth, _scaledTileDepth, _scaledTileHeight))
 				{
 					#if FLX_RENDER_BLIT
 					if (_flashRect.sprite == null) 
 					{
-						Buffer.pixels.copyPixels(cachedGraphics.bitmap, _flashRect, drawPt , null, null, true);
+						Buffer.pixels.copyPixels(cachedGraphics.bitmap, _flashRect, drawPt, null, null, true);
 					} else {
 						_flashRect.sprite.draw();
 						Buffer.pixels.copyPixels(_flashRect.sprite.framePixels, _flashRect, drawPt, null, null, true);
@@ -1179,9 +1144,9 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 	 * @param	cam	Current camera
 	 * @return	True if the tile is inside the screen, false otherwise
 	 */
-	private function isTileOnScreen(pos:Point, cam:FlxCamera):Bool
+	private static inline function isTileOnScreen(pos:Point, cam:FlxCamera, w:Float, d:Float, h:Float):Bool
 	{
-		return ((pos.x > (cam.x - _scaledTileWidth) && pos.x < cam.width) && (pos.y > (cam.y - (_scaledTileDepth + _scaledTileHeight)) && pos.y < cam.height));
+		return ((pos.x > (cam.x - w) && pos.x < cam.width) && (pos.y > (cam.y - (d + h)) && pos.y < cam.height));
 	}
 	
 	/**

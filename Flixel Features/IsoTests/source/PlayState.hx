@@ -30,17 +30,21 @@ class PlayState extends FlxState
 		FlxG.debugger.visible = true;
 		
 		//Map generator
-		mapWidth = 42;
-		mapHeight = 42;
+/*		mapWidth = 42;
+		mapHeight = 42;*/
+		
+		mapWidth = 65;
+		mapHeight = 65;
+		
 		mapGen = new MapGenerator(mapWidth, mapHeight, 3, 5, 11, false);
 		mapGen.setIndices(9, 8, 10, 11, 14, 16, 17, 15, 7, 5, 1, 1, 0);
 		mapGen.generate();
 		
 		//Shows the minimap
-		var minimap = mapGen.showMinimap(FlxG.stage, 6, MapAlign.TopLeft);
+/*		var minimap = mapGen.showMinimap(FlxG.stage, 6, MapAlign.TopLeft);
 		minimap.y += 10;
 		FlxG.addChildBelowMouse(minimap);
-		mapGen.showColorCodes();
+		mapGen.showColorCodes();*/
 		
 		//Getting data from map generator and conforming it to flixel format
 		var mapData:Array<Array<Int>> = mapGen.extractData();
@@ -126,6 +130,21 @@ class PlayState extends FlxState
 		if (FlxG.keys.justPressed.SPACE) {
 			FlxG.resetState();
 		}
+		
+		#if (neko || cpp)
+		if (FlxG.keys.justPressed.ENTER) {
+			var log:String = "";
+			var rects:Array<IsoRect> = map._rects.copy();
+			var numRects:Int = rects.length;
+			for (i in 0...numRects)
+			{
+				var rect:IsoRect = rects[i];
+				log += "rect '" + i + "'\tisoPos : " + rect.isoPos.toString() + "\t| depth : " +
+					rect.depth + "\t| onScreen : " + rect.onScreen + "\t| rect : " + rect.toString() + "\n";
+			}
+			sys.io.File.saveContent("./log.txt", log);
+		}
+		#end
 	}	
 	
 /*	function onMapCollide(objA:Dynamic, objB:Dynamic):Void
