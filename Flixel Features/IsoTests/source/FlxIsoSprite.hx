@@ -68,9 +68,9 @@ class FlxIsoSprite extends FlxSprite
 		}
 	}
 	
-	override public function update():Void 
+	override public function update(elapsed:Float):Void 
 	{
-		super.update();
+		super.update(elapsed);
 		
 		velocity.x = velocity.y = 0;
 		
@@ -129,7 +129,7 @@ class FlxIsoSprite extends FlxSprite
 	function setDestination()
 	{
 		lastFacing = isoFacing;
-		isoFacing = FlxRandom.intRanged(0, 3, [lastFacing]);
+		isoFacing = FlxG.random.int(0, 3, [lastFacing]);
 		
 		var dirX:Int = 0;
 		var dirY:Int = 0;
@@ -153,7 +153,7 @@ class FlxIsoSprite extends FlxSprite
 				animation.play("walk_se");
 		}
 		
-		var range:Int = FlxRandom.getObject(movementRanges);
+		var range:Int = FlxG.random.getObject(movementRanges);
 		destination.x = Math.floor(this.x) + range * dirX;
 		destination.y = Math.floor(this.y) + (range / 2) * dirY;
 		path.start(this, [destination], 80, FlxPath.FORWARD);
@@ -170,7 +170,7 @@ class FlxIsoSprite extends FlxSprite
 	
 	function move() 
 	{
-		path.update();
+		path.update(FlxG.elapsed);
 		adjustPosition();
 	}
 	

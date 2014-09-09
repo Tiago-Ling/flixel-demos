@@ -10,7 +10,7 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup;
-import flixel.group.FlxTypedGroup;
+import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.system.layer.DrawStackItem;
 import flixel.system.layer.frames.FlxSpriteFrames;
 import flixel.system.layer.Region;
@@ -436,15 +436,15 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 		return a.depth - b.depth;
 	}
 	
-	override public function update():Void
+	override public function update(elapsed:Float):Void
 	{
 		sortRange(_rects, compareNumberRise, 0, _rects.length);
 		
-		super.update();
+		super.update(elapsed);
 		
 		for (spr in spriteGroup.members)
 		{
-			spr.update();
+			spr.update(elapsed);
 		}
 	}
 	
@@ -591,7 +591,7 @@ class FlxIsoTilemap extends FlxBaseTilemap<FlxIsoTile>
 			#end
 			
 			#if !FLX_NO_DEBUG
-			FlxBasic._VISIBLECOUNT++;
+			FlxBasic.visibleCount++;
 			#end
 		}
 		

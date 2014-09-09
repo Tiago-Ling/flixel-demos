@@ -111,12 +111,12 @@ class PlayState extends FlxState
 	/**
 	 * Function that is called once every frame.
 	 */
-	override public function update():Void
+	override public function update(elapsed:Float):Void
 	{
 		//TODO: Make collision work
 		//FlxG.collide(map, map.spriteGroup, onMapCollide);
 		
-		super.update();
+		super.update(elapsed);
 			
 		if (FlxG.keys.pressed.A)
 			FlxG.camera.scroll.x -= 300 * FlxG.elapsed;
@@ -129,6 +129,20 @@ class PlayState extends FlxState
 			
 		if (FlxG.keys.justPressed.SPACE) {
 			FlxG.resetState();
+		}
+		
+		if (FlxG.keys.justPressed.ENTER) {
+			for (i in 0...10)
+			{
+				var char = new FlxIsoSprite(0, 0, true);
+				//var startRow:Int = FlxRandom.intRanged(3, mapHeight);
+				//var startCol:Int = FlxRandom.intRanged(3, mapWidth);
+				var startRow:Int = Std.int(mapHeight / 2);
+				var startCol:Int = Std.int(mapWidth / 2);
+				var initialTile:IsoRect = map.getIsoRectAt(startRow * startCol);
+				char.setPosition(initialTile.isoPos.x, initialTile.isoPos.y);
+				map.add(char);
+			}
 		}
 		
 		#if (neko || cpp)
